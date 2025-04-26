@@ -4,35 +4,37 @@ const jwt = require("jsonwebtoken");
 exports.register = async (req, res) => {
   try {
     console.log("Register request body:", req.body);
-    const { name, email, password, role } = req.body;
+    const { name, email, password, role, headline } = req.body;
 
-    // Validate input
     if (!name || !email || !password || !role) {
       console.log("Missing fields:", { name, email, password, role });
       return res.status(400).json({ message: "All fields are required" });
     }
 
-    if (!["customer", "professional"].includes(role)) {
+    if (!["customer", "professional"].includes(role.toLowerCase())) {
       console.log("Invalid role:", role);
       return res
         .status(400)
         .json({ message: "Role must be customer or professional" });
     }
 
-    // Check for existing user
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       console.log("Duplicate email:", email);
       return res.status(400).json({ message: "User already exists" });
     }
 
-    // Create and save user
     console.log("Creating user:", { name, email, role });
-    const user = new User({ name, email, password, role });
+    const user = new User({
+      name,
+      email,
+      password,
+      role: role.toLowerCase(),
+      headline,
+    });
     await user.save();
     console.log("User saved:", user._id);
 
-    // Generate JWT (optional, added for consistency with login)
     const token = jwt.sign(
       { id: user._id, role: user.role },
       process.env.JWT_SECRET,
@@ -93,6 +95,14 @@ exports.login = async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        headline: user.headline,
+        picture: user.picture,
+        portfolio: user.portfolio,
+        links: user.links,
+        contact: user.contact,
+        ratings: user.ratings,
+        averageRating: user.averageRating,
+        isOnline: user.isOnline,
       },
     });
   } catch (error) {
