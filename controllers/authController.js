@@ -4,7 +4,16 @@ const jwt = require("jsonwebtoken");
 exports.register = async (req, res) => {
   try {
     console.log("Register request body:", req.body);
-    const { name, email, password, role, headline } = req.body;
+    const {
+      name,
+      email,
+      password,
+      role,
+      headline,
+      serviceType,
+      businessRegNumber,
+      videoUrl,
+    } = req.body;
 
     if (!name || !email || !password || !role) {
       console.log("Missing fields:", { name, email, password, role });
@@ -30,21 +39,54 @@ exports.register = async (req, res) => {
       email,
       password,
       role: role.toLowerCase(),
-      headline,
+      headline: headline || "",
+      serviceType:
+        role.toLowerCase() === "professional" ? serviceType || "" : "",
+      businessRegNumber:
+        role.toLowerCase() === "professional" ? businessRegNumber || "" : "",
+      videoUrl: role.toLowerCase() === "professional" ? videoUrl || "" : "",
+      picture: "",
+      portfolio: [],
+      links: {
+        portfolio: "",
+        socialMedia: { twitter: "", linkedin: "", instagram: "" },
+        email: email,
+      },
+      contact: { address: "", phone: "" },
+      averageRating: 0,
+      isOnline: false,
     });
+
     await user.save();
     console.log("User saved:", user._id);
 
     const token = jwt.sign(
       { id: user._id, role: user.role },
       process.env.JWT_SECRET,
-      {
-        expiresIn: "1h",
-      }
+      { expiresIn: "1h" }
     );
     console.log("Token generated:", token);
 
-    res.status(201).json({ message: "User registered successfully", token });
+    res.status(201).json({
+      message: "User registered successfully",
+      token,
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        headline: user.headline,
+        serviceType: user.serviceType,
+        businessRegNumber: user.businessRegNumber,
+        videoUrl: user.videoUrl,
+        picture: user.picture,
+        portfolio: user.portfolio,
+        links: user.links,
+        contact: user.contact,
+        averageRating: user.averageRating,
+        isOnline: user.isOnline,
+      },
+    });
   } catch (error) {
     console.error("Register error:", error);
     if (error.code === 11000) {
@@ -81,6 +123,9 @@ exports.login = async (req, res) => {
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
+    user.isOnline = true;
+    await user.save();
+
     const token = jwt.sign(
       { id: user._id, role: user.role },
       process.env.JWT_SECRET,
@@ -96,13 +141,21 @@ exports.login = async (req, res) => {
         email: user.email,
         role: user.role,
         headline: user.headline,
-        picture: user.picture,
-        portfolio: user.portfolio,
-        links: user.links,
-        contact: user.contact,
-        ratings: user.ratings,
-        averageRating: user.averageRating,
-        isOnline: user.isOnline,
+        serviceType: user.serviceType,
+        businessRegNumber: user.businessRegNumber,
+        videoUrl: user.videoUrl,
+        picture: user.picture
+          ? `${process.env.BASE_URL || "http://localhost:5000"}${user.picture}`
+          : "",
+        portfolio: user.portfolio || [],
+        links: user.links || {
+          portfolio: "",
+          socialMedia: { twitter: "", linkedin: "", instagram: "" },
+          email: user.email,
+        },
+        contact: user.contact || { address: "", phone: "" },
+        averageRating: user.averageRating || 0,
+        isOnline: true,
       },
     });
   } catch (error) {
@@ -119,7 +172,31 @@ exports.getProfile = async (req, res) => {
       console.log("User not found:", req.user.id);
       return res.status(404).json({ message: "User not found" });
     }
-    res.json(user);
+
+    const completeProfile = {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      headline: user.headline || "",
+      serviceType: user.serviceType || "",
+      businessRegNumber: user.businessRegNumber || "",
+      videoUrl: user.videoUrl || "",
+      picture: user.picture
+        ? `${process.env.BASE_URL || "http://localhost:5000"}${user.picture}`
+        : "",
+      portfolio: user.portfolio || [],
+      links: user.links || {
+        portfolio: "",
+        socialMedia: { twitter: "", linkedin: "", instagram: "" },
+        email: user.email,
+      },
+      contact: user.contact || { address: "", phone: "" },
+      averageRating: user.averageRating || 0,
+      isOnline: user.isOnline || false,
+    };
+
+    res.json(completeProfile);
   } catch (error) {
     console.error("Profile error:", error);
     res.status(500).json({ message: "Server error" });
