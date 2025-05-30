@@ -1,7 +1,7 @@
 {
-  "name": "servicehub-server",
+  "name": "fidelbridge-server",
   "version": "1.0.0",
-  "description": "Backend for ServiceHub",
+  "description": "Backend for FidelBridge",
   "main": "server.js",
   "engines": {
     "node": "18.x"
