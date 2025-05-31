@@ -18,7 +18,7 @@ const allowedOrigins = [
   "https://fidel-bridge-frontend.vercel.app",
   "https://fidel-bridge-frontend-kloswasz3-femis-projects-0c9c7b22.vercel.app",
   "https://fidel-bridge-frontend-9rcubtqqy-femis-projects-0c9c7b22.vercel.app",
-  // Add more if needed
+  "https://fidel-bridge-frontend-dxdawwzpb-femis-projects-0c9c7b22.vercel.app" // ✅ ADDED THIS
 ];
 
 // CORS middleware
