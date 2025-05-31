@@ -8,8 +8,15 @@ dotenv.config();
 
 const app = express();
 
+// Configure CORS
+const allowedOrigin = process.env.FRONTEND_URL || "http://localhost:3000";
+
+app.use(cors({
+  origin: allowedOrigin,
+  credentials: true
+}));
+
 // Middleware
-app.use(cors());
 app.use(express.json());
 
 // Routes
