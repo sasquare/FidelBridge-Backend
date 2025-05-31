@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const cors = require("cors");
 const userRoutes = require("./routes/users");
+const authRoutes = require("./routes/auth");  // <-- ADD THIS LINE
 const http = require("http");
 const { Server } = require("socket.io");
 
@@ -14,7 +15,7 @@ const server = http.createServer(app);
 // Add ALL your deployed frontend origins here
 const allowedOrigins = [
   "http://localhost:3000",
-   "https://fidel-bridge-frontend.vercel.app",
+  "https://fidel-bridge-frontend.vercel.app",
   "https://fidel-bridge-frontend-kloswasz3-femis-projects-0c9c7b22.vercel.app",
   "https://fidel-bridge-frontend-9rcubtqqy-femis-projects-0c9c7b22.vercel.app",
   // add any other deployed frontend URLs here as needed
@@ -39,6 +40,7 @@ app.use(
 app.use(express.json());
 
 // API routes
+app.use("/api/auth", authRoutes);    // <-- ADD THIS LINE
 app.use("/api/users", userRoutes);
 
 // MongoDB connection without deprecated options
