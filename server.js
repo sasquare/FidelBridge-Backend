@@ -14,6 +14,7 @@ const server = http.createServer(app);
 // Add ALL your deployed frontend origins here
 const allowedOrigins = [
   "http://localhost:3000",
+   "https://fidel-bridge-frontend.vercel.app",
   "https://fidel-bridge-frontend-kloswasz3-femis-projects-0c9c7b22.vercel.app",
   "https://fidel-bridge-frontend-9rcubtqqy-femis-projects-0c9c7b22.vercel.app",
   // add any other deployed frontend URLs here as needed
