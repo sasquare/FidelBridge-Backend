@@ -1,28 +1,24 @@
-# ✅ Use official Node.js LTS base image
-FROM node:18-slim
+# Use official Node 18 slim image
+FROM node:18.20.8-slim
 
-# ✅ Set working directory
+# Set working directory inside container
 WORKDIR /app
 
-# ✅ Copy package files first for better Docker cache performance
+# Copy package.json and package-lock.json if present for efficient npm install
 COPY package*.json ./
 
-# ✅ Install dependencies
+# Install dependencies
 RUN npm install
 
-# ✅ Copy the rest of the application files
+# Copy rest of the application source code
 COPY . .
 
-# ✅ Create uploads directory with appropriate permissions
-RUN mkdir -p uploads && chmod -R 755 uploads
+# Create uploads directory with proper permissions to avoid runtime errors
+RUN mkdir -p uploads && \
+    chmod -R 777 uploads
 
-# ✅ Ensure .env variables are loaded by your hosting platform (not from Dockerfile)
-# If needed, platform should inject them, not copy your local .env
-# (Avoid copying .env directly into the image for security)
-# COPY .env .   ← DO NOT do this in production
-
-# ✅ Expose the app port
+# Expose the port the app runs on
 EXPOSE 5000
 
-# ✅ Start the server using Node.js
+# Run the app
 CMD ["npm", "start"]
