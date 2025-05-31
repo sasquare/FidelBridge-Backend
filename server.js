@@ -4,6 +4,7 @@ const dotenv = require("dotenv");
 const cors = require("cors");
 const http = require("http");
 const { Server } = require("socket.io");
+const path = require("path");
 
 // Load environment variables
 dotenv.config();
@@ -36,6 +37,9 @@ app.use(
 
 // Middleware
 app.use(express.json());
+
+// Serve uploads folder statically so uploaded files are accessible
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Import routes
 const authRoutes = require("./routes/auth");
