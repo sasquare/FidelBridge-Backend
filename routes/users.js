@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const User = require("../model/User");
+const User = require("../models/User"); // fixed path
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
@@ -52,7 +52,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-// Get a single professional by ID
+// Get a single user by ID
 router.get("/:id", async (req, res) => {
   try {
     const user = await User.findById(req.params.id).select("-password");
