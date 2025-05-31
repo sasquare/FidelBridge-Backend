@@ -30,7 +30,6 @@ const userSchema = new mongoose.Schema({
     ],
   },
   businessRegNumber: { type: String, default: "" },
-  videoUrl: { type: String, default: "" },
   portfolio: [
     {
       title: { type: String, default: "" },
@@ -67,6 +66,7 @@ const userSchema = new mongoose.Schema({
   isOnline: { type: Boolean, default: false },
 });
 
+// Hash password before saving
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
   const salt = await bcrypt.genSalt(10);
@@ -74,11 +74,7 @@ userSchema.pre("save", async function (next) {
   next();
 });
 
-// Define comparePassword method
-userSchema.methods.comparePassword = async function (password) {
-  return await bcrypt.compare(password, this.password);
-};
-
+// Recalculate averageRating before saving
 userSchema.pre("save", function (next) {
   if (this.ratings.length > 0) {
     const total = this.ratings.reduce((sum, r) => sum + r.score, 0);
@@ -89,5 +85,9 @@ userSchema.pre("save", function (next) {
   next();
 });
 
-// Prevent model overwrite
+// Compare password method
+userSchema.methods.comparePassword = async function (password) {
+  return await bcrypt.compare(password, this.password);
+};
+
 module.exports = mongoose.models.User || mongoose.model("User", userSchema);
