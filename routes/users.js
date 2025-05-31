@@ -5,7 +5,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const multer = require("multer");
 const path = require("path");
-const authMiddleware = require("../middleware/authMiddleware"); // adjust path if needed
+const authMiddleware = require("../middleware/auth");
 
 // Multer storage config
 const storage = multer.diskStorage({
