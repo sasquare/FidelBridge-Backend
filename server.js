@@ -11,7 +11,7 @@ dotenv.config();
 const app = express();
 const server = http.createServer(app);
 
-// Allow multiple origins: localhost (dev) and deployed Vercel domain (prod)
+// Allow multiple origins: localhost (dev) and your deployed frontend domain (prod)
 const allowedOrigins = [
   "http://localhost:3000",
   "https://fidel-bridge-frontend-kloswasz3-femis-projects-0c9c7b22.vercel.app"
@@ -20,6 +20,7 @@ const allowedOrigins = [
 // CORS middleware
 app.use(cors({
   origin: function (origin, callback) {
+    // allow requests with no origin like mobile apps or curl
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
@@ -44,7 +45,7 @@ mongoose
   .then(() => console.log("✅ Connected to MongoDB"))
   .catch((err) => console.error("❌ MongoDB connection error:", err));
 
-// Set up Socket.IO
+// Set up Socket.IO with the same CORS origins
 const io = new Server(server, {
   cors: {
     origin: allowedOrigins,
@@ -61,8 +62,7 @@ io.on("connection", (socket) => {
     console.log("🔴 Client disconnected:", socket.id);
   });
 
-  // You can handle other custom events here
-  // socket.on("chat message", (msg) => { ... });
+  // Additional event handlers here
 });
 
 // Server port
