@@ -3,15 +3,29 @@ const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const cors = require("cors");
 const userRoutes = require("./routes/users");
+const http = require("http");
+const { Server } = require("socket.io");
 
 dotenv.config();
 
 const app = express();
+const server = http.createServer(app);
 
-// Configure CORS
-const allowedOrigin = process.env.FRONTEND_URL || "http://localhost:3000";
+// Allow multiple origins: localhost (dev) and deployed Vercel domain (prod)
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://fidel-bridge-frontend-kloswasz3-femis-projects-0c9c7b22.vercel.app"
+];
+
+// CORS middleware
 app.use(cors({
-  origin: allowedOrigin,
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   credentials: true,
 }));
 
@@ -30,8 +44,29 @@ mongoose
   .then(() => console.log("✅ Connected to MongoDB"))
   .catch((err) => console.error("❌ MongoDB connection error:", err));
 
+// Set up Socket.IO
+const io = new Server(server, {
+  cors: {
+    origin: allowedOrigins,
+    methods: ["GET", "POST"],
+    credentials: true,
+  }
+});
+
+// Socket.io connection handler
+io.on("connection", (socket) => {
+  console.log("🟢 New client connected:", socket.id);
+
+  socket.on("disconnect", () => {
+    console.log("🔴 Client disconnected:", socket.id);
+  });
+
+  // You can handle other custom events here
+  // socket.on("chat message", (msg) => { ... });
+});
+
 // Server port
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
 });
