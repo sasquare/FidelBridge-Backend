@@ -2,30 +2,35 @@ const express = require("express");
 const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 const cors = require("cors");
-const userRoutes = require("./routes/users");
-const authRoutes = require("./routes/auth");  // <-- ADD THIS LINE
 const http = require("http");
 const { Server } = require("socket.io");
 
+// Load environment variables
 dotenv.config();
+
+// Import routes
+const authRoutes = require("./routes/auth");
+const userRoutes = require("./routes/users");
+const dashboardRoutes = require("./routes/dashboardRoutes"); // ✅ FIXED: Added
+const requestRoutes = require("./routes/requests");
+const messageRoutes = require("./routes/messages");
 
 const app = express();
 const server = http.createServer(app);
 
-// Add ALL your deployed frontend origins here
+// Define allowed origins
 const allowedOrigins = [
   "http://localhost:3000",
   "https://fidel-bridge-frontend.vercel.app",
   "https://fidel-bridge-frontend-kloswasz3-femis-projects-0c9c7b22.vercel.app",
   "https://fidel-bridge-frontend-9rcubtqqy-femis-projects-0c9c7b22.vercel.app",
-  // add any other deployed frontend URLs here as needed
+  // add more as needed
 ];
 
-// CORS middleware for Express routes
+// CORS middleware
 app.use(
   cors({
     origin: function (origin, callback) {
-      // allow requests with no origin (e.g. mobile apps, curl)
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
@@ -36,20 +41,23 @@ app.use(
   })
 );
 
-// Middleware for JSON parsing
+// Middleware
 app.use(express.json());
 
-// API routes
-app.use("/api/auth", authRoutes);    // <-- ADD THIS LINE
+// Mount API routes
+app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
+app.use("/api/dashboard", dashboardRoutes); // ✅ FIXED: Added
+app.use("/api/requests", requestRoutes);
+app.use("/api/messages", messageRoutes);
 
-// MongoDB connection without deprecated options
+// MongoDB connection
 mongoose
   .connect(process.env.MONGO_URI)
   .then(() => console.log("✅ Connected to MongoDB"))
   .catch((err) => console.error("❌ MongoDB connection error:", err));
 
-// Setup Socket.IO with matching CORS config
+// Setup Socket.IO
 const io = new Server(server, {
   cors: {
     origin: allowedOrigins,
@@ -65,8 +73,7 @@ io.on("connection", (socket) => {
     console.log("🔴 Client disconnected:", socket.id);
   });
 
-  // Handle other custom socket events here
-  // socket.on("event-name", (data) => { ... });
+  // Define additional socket event handlers here if needed
 });
 
 // Start server
