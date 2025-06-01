@@ -18,7 +18,7 @@ const allowedOrigins = [
   "https://fidel-bridge-frontend.vercel.app",
   "https://fidel-bridge-frontend-kloswasz3-femis-projects-0c9c7b22.vercel.app",
   "https://fidel-bridge-frontend-9rcubtqqy-femis-projects-0c9c7b22.vercel.app",
-  "https://fidel-bridge-frontend-dxdawwzpb-femis-projects-0c9c7b22.vercel.app" // ✅ ADDED THIS
+  "https://fidel-bridge-frontend-dxdawwzpb-femis-projects-0c9c7b22.vercel.app"
 ];
 
 // CORS middleware
@@ -64,13 +64,14 @@ mongoose
   .then(() => console.log("✅ Connected to MongoDB"))
   .catch((err) => console.error("❌ MongoDB connection error:", err));
 
-// Setup Socket.IO
+// Setup Socket.IO with explicit path and CORS
 const io = new Server(server, {
   cors: {
     origin: allowedOrigins,
     methods: ["GET", "POST"],
     credentials: true,
   },
+  path: "/socket.io",
 });
 
 io.on("connection", (socket) => {
@@ -80,7 +81,7 @@ io.on("connection", (socket) => {
     console.log("🔴 Client disconnected:", socket.id);
   });
 
-  // Extend with more events here if needed
+  // Additional event handlers here if needed
 });
 
 // Start server using dynamic port for Render compatibility
