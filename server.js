@@ -12,32 +12,17 @@ dotenv.config();
 const app = express();
 const server = http.createServer(app);
 
-// CORS middleware
-app.use(
-  cors({
-    origin: function (origin, callback) {
-      const allowedOrigins = [
-        "http://localhost:3000",
-        "https://fidel-bridge-frontend.vercel.app",
-        "https://fidel-bridge-frontend-kloswasz3-femis-projects-0c9c7b22.vercel.app",
-        "https://fidel-bridge-frontend-9rcubtqqy-femis-projects-0c9c7b22.vercel.app",
-        "https://fidel-bridge-frontend-dxdawwzpb-femis-projects-0c9c7b22.vercel.app",
-        "https://fidel-bridge-frontend-fuftn9cn9-femis-projects-0c9c7b22.vercel.app"
-      ];
+// ✅ Define allowedOrigins globally so it can be reused
+const allowedOrigins = [
+  "http://localhost:3000",
+  "https://fidel-bridge-frontend.vercel.app",
+  "https://fidel-bridge-frontend-kloswasz3-femis-projects-0c9c7b22.vercel.app",
+  "https://fidel-bridge-frontend-9rcubtqqy-femis-projects-0c9c7b22.vercel.app",
+  "https://fidel-bridge-frontend-dxdawwzpb-femis-projects-0c9c7b22.vercel.app",
+  "https://fidel-bridge-frontend-fuftn9cn9-femis-projects-0c9c7b22.vercel.app",
+];
 
-      if (!origin || allowedOrigins.includes(origin)) {
-        callback(null, true);
-      } else {
-        callback(new Error("Not allowed by CORS"));
-      }
-    },
-    credentials: true,
-  })
-);
-
-
-
-// CORS middleware
+// ✅ Apply CORS middleware once using dynamic origin check
 app.use(
   cors({
     origin: function (origin, callback) {
@@ -53,18 +38,15 @@ app.use(
 
 // Middleware
 app.use(express.json());
-
-// Serve uploads folder statically so uploaded files are accessible
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-// Import routes
+// Routes
 const authRoutes = require("./routes/auth");
 const userRoutes = require("./routes/users");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 const requestRoutes = require("./routes/requests");
 const messageRoutes = require("./routes/messages");
 
-// Mount routes
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/dashboard", dashboardRoutes);
@@ -80,7 +62,7 @@ mongoose
   .then(() => console.log("✅ Connected to MongoDB"))
   .catch((err) => console.error("❌ MongoDB connection error:", err));
 
-// Setup Socket.IO with explicit path and CORS
+// ✅ Socket.IO configuration using same allowedOrigins
 const io = new Server(server, {
   cors: {
     origin: allowedOrigins,
@@ -97,10 +79,10 @@ io.on("connection", (socket) => {
     console.log("🔴 Client disconnected:", socket.id);
   });
 
-  // Additional event handlers here if needed
+  // Additional events here
 });
 
-// Start server using dynamic port for Render compatibility
+// Start server
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
