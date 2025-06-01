@@ -118,7 +118,7 @@ router.post("/:id/rate", async (req, res) => {
 // Upload profile picture (authenticated)
 router.post(
   "/upload-picture",
-  authMiddleware,
+  authMiddleware.verifyToken,
   upload.single("picture"),
   async (req, res) => {
     try {
@@ -146,7 +146,7 @@ router.post(
 );
 
 // Update profile (authenticated)
-router.put("/update", authMiddleware, async (req, res) => {
+router.put("/update", authMiddleware.verifyToken, async (req, res) => {
   const userId = req.user.id;
   const updates = req.body;
 
