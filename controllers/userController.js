@@ -21,13 +21,20 @@ exports.uploadPicture = async (req, res) => {
     if (!req.file) {
       return res.status(400).json({ message: "No file uploaded" });
     }
-    const picturePath = `/uploads/${req.file.filename}`;  // Fix: wrap string in backticks for template literal
+
+    const baseUrl = process.env.BASE_URL || "http://localhost:5000";
+    const pictureUrl = `${baseUrl}/uploads/${req.file.filename}`;
+
     const user = await User.findByIdAndUpdate(
       req.user.id,
-      { picture: picturePath },
+      { picture: pictureUrl },
       { new: true }
     ).select("-password");
-    res.json({ message: "Picture uploaded", picture: picturePath });
+
+    res.status(200).json({
+      message: "Picture uploaded successfully",
+      picture: pictureUrl,
+    });
   } catch (error) {
     console.error("Upload picture error:", error);
     res.status(500).json({ message: "Server error" });
@@ -55,7 +62,6 @@ exports.updateProfile = async (req, res) => {
           .status(400)
           .json({ message: "Portfolio must be an array with max 2 items" });
       }
-      // Fix typo here: changed 'uj7k8l9m0n1o2p3q4pdateData' to 'updateData'
       updateData.portfolio = portfolio.map((item) => ({
         title: item.title || "",
         image: item.image || "",
@@ -124,6 +130,7 @@ exports.getProfessional = async (req, res) => {
     if (!professional || professional.role !== "professional") {
       return res.status(404).json({ message: "Professional not found" });
     }
+
     const completeProfile = {
       id: professional._id,
       name: professional.name,
@@ -133,9 +140,7 @@ exports.getProfessional = async (req, res) => {
       serviceType: professional.serviceType || "",
       businessRegNumber: professional.businessRegNumber || "",
       videoUrl: professional.videoUrl || "",
-      picture: professional.picture
-        ? `${process.env.BASE_URL || "http://localhost:5000"}${professional.picture}`
-        : "",
+      picture: professional.picture || "",
       portfolio: professional.portfolio || [],
       links: professional.links || {
         portfolio: "",
@@ -146,6 +151,7 @@ exports.getProfessional = async (req, res) => {
       averageRating: professional.averageRating || 0,
       isOnline: professional.isOnline || false,
     };
+
     res.json(completeProfile);
   } catch (error) {
     console.error("Get professional error:", error);
