@@ -6,27 +6,28 @@ const http = require("http");
 const { Server } = require("socket.io");
 const path = require("path");
 
-// Load environment variables
 dotenv.config();
 
 const app = express();
 const server = http.createServer(app);
 
-// ✅ Define allowedOrigins globally so it can be reused
+// Allow listed origins (including Vercel preview deployments)
 const allowedOrigins = [
   "http://localhost:3000",
   "https://fidel-bridge-frontend.vercel.app",
-  "https://fidel-bridge-frontend-kloswasz3-femis-projects-0c9c7b22.vercel.app",
-  "https://fidel-bridge-frontend-9rcubtqqy-femis-projects-0c9c7b22.vercel.app",
-  "https://fidel-bridge-frontend-dxdawwzpb-femis-projects-0c9c7b22.vercel.app",
-  "https://fidel-bridge-frontend-fuftn9cn9-femis-projects-0c9c7b22.vercel.app",
+  /\.vercel\.app$/, // Allow all Vercel preview deployments
 ];
 
-// ✅ Apply CORS middleware once using dynamic origin check
+// CORS middleware
 app.use(
   cors({
     origin: function (origin, callback) {
-      if (!origin || allowedOrigins.includes(origin)) {
+      if (
+        !origin ||
+        allowedOrigins.some((o) =>
+          typeof o === "string" ? o === origin : o.test(origin)
+        )
+      ) {
         callback(null, true);
       } else {
         callback(new Error("Not allowed by CORS"));
@@ -38,6 +39,8 @@ app.use(
 
 // Middleware
 app.use(express.json());
+
+// Serve static uploaded files
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Routes
@@ -53,6 +56,11 @@ app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/requests", requestRoutes);
 app.use("/api/messages", messageRoutes);
 
+// Optional: Health check endpoint for Render
+app.get("/api/health", (req, res) => {
+  res.status(200).send("Server is healthy!");
+});
+
 // MongoDB connection
 mongoose
   .connect(process.env.MONGO_URI, {
@@ -62,24 +70,35 @@ mongoose
   .then(() => console.log("✅ Connected to MongoDB"))
   .catch((err) => console.error("❌ MongoDB connection error:", err));
 
-// ✅ Socket.IO configuration using same allowedOrigins
+// Socket.IO setup
 const io = new Server(server, {
   cors: {
-    origin: allowedOrigins,
+    origin: function (origin, callback) {
+      if (
+        !origin ||
+        allowedOrigins.some((o) =>
+          typeof o === "string" ? o === origin : o.test(origin)
+        )
+      ) {
+        callback(null, true);
+      } else {
+        callback(new Error("Socket.IO: Not allowed by CORS"));
+      }
+    },
     methods: ["GET", "POST"],
     credentials: true,
   },
-  path: "/socket.io",
+  path: "/socket.io", // keep this in sync with frontend
 });
 
 io.on("connection", (socket) => {
-  console.log("🟢 New client connected:", socket.id);
+  console.log("🟢 Client connected:", socket.id);
 
   socket.on("disconnect", () => {
     console.log("🔴 Client disconnected:", socket.id);
   });
 
-  // Additional events here
+  // Define your socket events here
 });
 
 // Start server
