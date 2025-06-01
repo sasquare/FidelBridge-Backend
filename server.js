@@ -12,13 +12,13 @@ dotenv.config();
 const app = express();
 const server = http.createServer(app);
 
-// Define allowed origins
 const allowedOrigins = [
   "http://localhost:3000",
   "https://fidel-bridge-frontend.vercel.app",
   "https://fidel-bridge-frontend-kloswasz3-femis-projects-0c9c7b22.vercel.app",
   "https://fidel-bridge-frontend-9rcubtqqy-femis-projects-0c9c7b22.vercel.app",
-  "https://fidel-bridge-frontend-dxdawwzpb-femis-projects-0c9c7b22.vercel.app"
+  "https://fidel-bridge-frontend-dxdawwzpb-femis-projects-0c9c7b22.vercel.app",
+  "https://fidel-bridge-frontend-fuftn9cn9-femis-projects-0c9c7b22.vercel.app" // ✅ newly deployed frontend
 ];
 
 // CORS middleware
