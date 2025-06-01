@@ -49,12 +49,14 @@ const userRoutes = require("./routes/users");
 const dashboardRoutes = require("./routes/dashboardRoutes");
 const requestRoutes = require("./routes/requests");
 const messageRoutes = require("./routes/messages");
+const profileRoutes = require("./routes/profile");
 
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/requests", requestRoutes);
 app.use("/api/messages", messageRoutes);
+app.use("/profile", profileRoutes); 
 
 // Optional: Health check endpoint for Render
 app.get("/api/health", (req, res) => {
