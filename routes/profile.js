@@ -1,12 +1,13 @@
 const express = require("express");
 const router = express.Router();
-const User = require("../models/User"); // Adjust path if needed
-const { verifyToken } = require("../middleware/auth"); // Optional: if using auth middleware
+const User = require("../models/User");
+const { verifyToken } = require("../middleware/auth");
 
 // PUT /profile/update
-router.put("/update", /* verifyToken, */ async (req, res) => {
+router.put("/update", verifyToken, async (req, res) => {
   try {
-    const { userId, name, email, bio, skills } = req.body;
+    const { name, email, bio, skills } = req.body;
+    const userId = req.user.id;
 
     const updatedUser = await User.findByIdAndUpdate(
       userId,
