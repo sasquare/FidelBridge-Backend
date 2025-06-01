@@ -21,7 +21,7 @@ exports.uploadPicture = async (req, res) => {
     if (!req.file) {
       return res.status(400).json({ message: "No file uploaded" });
     }
-    const picturePath = `/uploads/${req.file.filename}`;
+    const picturePath = `/uploads/${req.file.filename}`;  // Fix: wrap string in backticks for template literal
     const user = await User.findByIdAndUpdate(
       req.user.id,
       { picture: picturePath },
@@ -45,20 +45,24 @@ exports.updateProfile = async (req, res) => {
       businessRegNumber,
       videoUrl,
     } = req.body;
+
     const updateData = {};
     if (headline) updateData.headline = headline;
+
     if (portfolio) {
       if (!Array.isArray(portfolio) || portfolio.length > 2) {
         return res
           .status(400)
           .json({ message: "Portfolio must be an array with max 2 items" });
       }
-      uj7k8l9m0n1o2p3q4pdateData.portfolio = portfolio.map((item) => ({
+      // Fix typo here: changed 'uj7k8l9m0n1o2p3q4pdateData' to 'updateData'
+      updateData.portfolio = portfolio.map((item) => ({
         title: item.title || "",
         image: item.image || "",
         description: item.description || "",
       }));
     }
+
     if (links) updateData.links = links;
     if (contact) updateData.contact = contact;
     if (serviceType) updateData.serviceType = serviceType;
@@ -69,6 +73,7 @@ exports.updateProfile = async (req, res) => {
       new: true,
       runValidators: true,
     }).select("-password");
+
     res.json(user);
   } catch (error) {
     console.error("Update profile error:", error);
@@ -129,9 +134,7 @@ exports.getProfessional = async (req, res) => {
       businessRegNumber: professional.businessRegNumber || "",
       videoUrl: professional.videoUrl || "",
       picture: professional.picture
-        ? `${process.env.BASE_URL || "http://localhost:5000"}${
-            professional.picture
-          }`
+        ? `${process.env.BASE_URL || "http://localhost:5000"}${professional.picture}`
         : "",
       portfolio: professional.portfolio || [],
       links: professional.links || {
