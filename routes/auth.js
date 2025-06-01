@@ -1,12 +1,12 @@
 const express = require("express");
 const router = express.Router();
 const authController = require("../controllers/authController");
-const authMiddleware = require("../middleware/auth");
+const { verifyToken } = require("../middleware/auth"); // Destructure properly
 
 router.post("/register", authController.register);
 router.post("/login", authController.login);
 
-// Use controller directly to avoid inline clutter
-router.get("/profile", authMiddleware, authController.getProfile);
+// Correct middleware usage
+router.get("/profile", verifyToken, authController.getProfile);
 
 module.exports = router;
