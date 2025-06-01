@@ -11,14 +11,14 @@ dotenv.config();
 const app = express();
 const server = http.createServer(app);
 
-// Allow listed origins (including Vercel preview deployments)
+// ✅ Allow listed origins (including Vercel preview deployments)
 const allowedOrigins = [
   "http://localhost:3000",
   "https://fidel-bridge-frontend.vercel.app",
   /\.vercel\.app$/, // Allow all Vercel preview deployments
 ];
 
-// CORS middleware
+// ✅ CORS middleware
 app.use(
   cors({
     origin: function (origin, callback) {
@@ -37,13 +37,13 @@ app.use(
   })
 );
 
-// Middleware
+// ✅ Middleware
 app.use(express.json());
 
-// Serve static uploaded files
+// ✅ Serve static uploaded images
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-// Routes
+// ✅ API Routes
 const authRoutes = require("./routes/auth");
 const userRoutes = require("./routes/users");
 const dashboardRoutes = require("./routes/dashboardRoutes");
@@ -58,12 +58,12 @@ app.use("/api/requests", requestRoutes);
 app.use("/api/messages", messageRoutes);
 app.use("/profile", profileRoutes); 
 
-// Optional: Health check endpoint for Render
+// ✅ Health check (for Render or Vercel uptime monitoring)
 app.get("/api/health", (req, res) => {
   res.status(200).send("Server is healthy!");
 });
 
-// MongoDB connection
+// ✅ MongoDB connection
 mongoose
   .connect(process.env.MONGO_URI, {
     useNewUrlParser: true,
@@ -72,7 +72,7 @@ mongoose
   .then(() => console.log("✅ Connected to MongoDB"))
   .catch((err) => console.error("❌ MongoDB connection error:", err));
 
-// Socket.IO setup
+// ✅ Socket.IO setup
 const io = new Server(server, {
   cors: {
     origin: function (origin, callback) {
@@ -90,7 +90,7 @@ const io = new Server(server, {
     methods: ["GET", "POST"],
     credentials: true,
   },
-  path: "/socket.io", // keep this in sync with frontend
+  path: "/socket.io", // Sync with frontend Socket config
 });
 
 io.on("connection", (socket) => {
@@ -100,10 +100,10 @@ io.on("connection", (socket) => {
     console.log("🔴 Client disconnected:", socket.id);
   });
 
-  // Define your socket events here
+  // Optional: Define socket events here
 });
 
-// Start server
+// ✅ Start server
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
   console.log(`🚀 Server running on port ${PORT}`);
