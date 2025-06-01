@@ -1,7 +1,6 @@
 const express = require("express");
 const router = express.Router();
 const User = require("../models/User");
-const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const multer = require("multer");
 const path = require("path");
@@ -9,17 +8,17 @@ const authMiddleware = require("../middleware/auth");
 
 // Multer storage config
 const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "uploads/"); // make sure this folder exists
+  destination: (req, file, cb) => {
+    cb(null, "uploads/"); // ensure folder exists and is publicly served
   },
-  filename: function (req, file, cb) {
-    cb(null, Date.now() + path.extname(file.originalname)); // unique file name
+  filename: (req, file, cb) => {
+    cb(null, Date.now() + path.extname(file.originalname));
   },
 });
 
 const upload = multer({ storage });
 
-// User registration
+// Register user
 router.post("/register", async (req, res) => {
   const { name, email, password, role } = req.body;
 
@@ -37,7 +36,7 @@ router.post("/register", async (req, res) => {
   }
 });
 
-// User login
+// Login user
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
@@ -51,12 +50,13 @@ router.post("/login", async (req, res) => {
     const token = jwt.sign(
       { id: user._id },
       process.env.JWT_SECRET || "secret",
-      {
-        expiresIn: "1d",
-      }
+      { expiresIn: "1d" }
     );
 
-    res.status(200).json({ token, user });
+    const safeUser = user.toObject();
+    delete safeUser.password;
+
+    res.status(200).json({ token, user: safeUser });
   } catch (err) {
     res.status(500).json({ error: "Server error" });
   }
@@ -72,7 +72,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-// Get a single user by ID
+// Get single user by ID
 router.get("/:id", async (req, res) => {
   try {
     const user = await User.findById(req.params.id).select("-password");
@@ -130,7 +130,6 @@ router.post(
       const user = await User.findById(userId);
       if (!user) return res.status(404).json({ message: "User not found" });
 
-      // Save the picture URL or path
       user.picture = `/uploads/${req.file.filename}`;
       await user.save();
 
